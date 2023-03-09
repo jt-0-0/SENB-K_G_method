@@ -5,7 +5,7 @@
 % ------------------ Written by Sammy He and Joe Terry ------------------ %
 % ---- Department of Mechanical Engineering, Imperial College London ---- %
 % ------------------- sch12@ic.ac.uk, jst114@ic.ac.uk ------------------- %
-% --- Copyright © 2022, Imperial College, London, All rights reserved --- %
+% --- Copyright © 2023, Imperial College, London, All rights reserved --- %
 % ---------------------- Last Updated: 09-03-2023 ----------------------- %
 % ----------------------------------------------------------------------- %
 
@@ -879,6 +879,6 @@ save(spectype);
 % ------------------ Written by Sammy He and Joe Terry ------------------ %
 % ---- Department of Mechanical Engineering, Imperial College London ---- %
 % ------------------- sch12@ic.ac.uk, jst114@ic.ac.uk ------------------- %
-% --- Copyright © 2022, Imperial College, London, All rights reserved --- %
+% --- Copyright © 2023, Imperial College, London, All rights reserved --- %
 % ---------------------- Last Updated: 09-03-2023 ----------------------- %
 % ----------------------------------------------------------------------- %

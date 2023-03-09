@@ -1,4 +1,4 @@
 If you use this software for published work, use the following citation:
 
-Terry, J.S., & He, S. (2022). SENB K and G (brittle polymer) method data analysis code for MATLAB.
+Terry, J.S., & He, S. (2023). SENB K and G (brittle polymer) method data analysis code for MATLAB.
 Imperial College London, London, United Kingdom. [Software].  https://doi.org/
