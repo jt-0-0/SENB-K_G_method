@@ -6,10 +6,9 @@ In accordance to ISO 527-1 and ASTM D5045-14
 Version 1.0
 Written by Sammy He and Joe Terry
 Department of Mechanical Engineering, Imperial College London
-sch12@ic.ac.uk, jst114@ic.ac.uk
+(sch12@ic.ac.uk, jst114@ic.ac.uk)
 Copyright © 2023, Imperial College, London, All rights reserved
 Last Updated: 09-03-2023
-
 
 If you use this software for published work, use the following citation:
 
