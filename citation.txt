@@ -1,4 +1,14 @@
+% ----------------------------------------------------------------------- %
+% ------------------- Code to determine K_IC and G_IC ------------------- %
+% ------------ In accordance to ISO 527-1 and ASTM D5045-14 ------------- %
+% ----------------------------- Version 1.0 ----------------------------- %
+% ------------------ Written by Sammy He and Joe Terry ------------------ %
+% ---- Department of Mechanical Engineering, Imperial College London ---- %
+% ------------------- sch12@ic.ac.uk, jst114@ic.ac.uk ------------------- %
+% --- Copyright © 2022, Imperial College, London, All rights reserved --- %
+% ---------------------- Last Updated: 09-09-2022 ----------------------- %
+% ----------------------------------------------------------------------- %
+
 If you use this software for published work, use the following citation:
 
-Terry, J.S., & He, S. (2023). SENB K and G (brittle polymer) method data analysis code for MATLAB.
-Imperial College London, London, United Kingdom. [Software].  https://doi.org/
+Terry, J.S., & He, S. (2022). SENB K and G (brittle polymer) method data analysis code for MATLAB. Imperial College London, London, United Kingdom. [Software].  https://doi.org/10.5281/zenodo.7713071
