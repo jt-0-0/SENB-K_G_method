@@ -13,7 +13,7 @@ Last Updated: 09-03-2023
 If you use this software for published work, use the following citation:
 
 Terry, J.S., & He, S. (2023). SENB K and G (brittle polymer) method data analysis code for MATLAB.
-Imperial College London, London, United Kingdom. [Software].  https://doi.org/
+Imperial College London, London, United Kingdom. [Software].  https://doi.org/10.5281/zenodo.7713071
 
 
 This code will find the values for K_IC, and G_IC (via energy and LEFM methods) for tests using multiple brittle plastic specimens, similar to that in ISO 527-1 and ASTM D5045 - 14
