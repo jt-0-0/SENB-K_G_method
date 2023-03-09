@@ -100,8 +100,7 @@
 % the Load 5 line. 
 
 % It is suggested to use this sensibly, select the linear section which is
-% representative of the sample before the crack propagates. Some examples
-% are shown in the help file.
+% representative of the sample before the crack propagates.
 
 % Once the code has run, it will produce a written summary of the result 
 % for each specimen and mean values for valid specimens. It will also 
