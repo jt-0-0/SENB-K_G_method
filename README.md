@@ -56,7 +56,7 @@ Then click run!
 A figure will appear with the indentation data. Select the linear region that is representative of the sample compliance.
 
 Afterwards, a figure will appear for each specimen, select two x-coordinates to define the range to determine the average linear gradient, this will be used to find the Load 5 line.
-It is suggested to use this sensibly, select the linear section which is representative of the sample before the crack propagates. Some examples are shown in the help file.
+It is suggested to use this sensibly, select the linear section which is representative of the sample before the crack propagates.
 
 Once the code has run, it will produce a written summary of the result for each specimen and mean values for valid specimens. It will also produce comparison figures for all specimens, displaying their validity.
 
