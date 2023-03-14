@@ -8,51 +8,51 @@
 % --- Copyright © 2023, Imperial College, London, All rights reserved --- %
 % ---------------------- Last Updated: 09-03-2023 ----------------------- %
 % ----------------------------------------------------------------------- %
-
+ 
 % ------------------------------- SUMMARY ------------------------------- %
-
+ 
 % This code will find the values for K_IC, and G_IC (via energy and LEFM 
 % methods) for tests using multiple brittle plastic specimens, similar  
 % to that in ISO 527-1 and ASTM D5045 - 14
-
+ 
 % The code allows for a linear correction to the start of the load vs.
 % extension data for compliance such that it passes through 0,0 and
 % removes any initial load ramping errors.
-
+ 
 % The user can select the region to calculate the linear gradient for
 % specimen compliance and to then calculate P5.
-
+ 
 % The code determines, Pmax, P5 and determines which to use. It then 
 % calculates energy under the curve for sample and compliance, and 
 % determines K_IC and G_IC (via energy and LEFM methods) for each specimen. 
-
+ 
 % It will apply the validity criteria, specify valid/invalid specimens and
 % it will present the mean average values and standard deviation of K_IC 
 % and G_IC (via energy and LEFM methods) for valid specimens.
-
+ 
 % It is difficult to control initial crack length when razor tapping 
 % specimens, therefore the criteria specifying the length and variation of  
 % this length, can be slightly loosened if desired by the user.
-
+ 
 % ----------------------------------------------------------------------- %
-
+ 
 %------------------------------ INSTRUCTIONS -----------------------------%
-
-% It is reccomended that you make a new copy of this matlab script for each 
+ 
+% It is recommended that you make a new copy of this MATLAB script for each 
 % type of specimen, so that it easy to re-run, should you so wish.
-
-% Specimen data files should be comma seperated value files (.csv)
+ 
+% Specimen data files should be comma separated value files (.csv)
 % Load should be in N and displacement in mm, otherwise there will be
-% discprepancies with the units in subsequent calculations
+% discrepancies with the units in subsequent calculations
 % Specimen dimensions should be an excel spreadsheet (.xlsx)
 % Dimension data should be inserted into a document following the 
 % format of 'Specimen Dimensions K G Template'.
 % Dimensions should be in mm.
-
+ 
 % If you wish to add extra specimens to the dimensions excel sheet, you can
 % copy and paste but do check the equation formulas are correct, especially 
 % those in row F which were attached to fixed cells e.g. $C$5, $C$9 etc.
-
+ 
 % To reduce probability of code errors, the compliance data should be 
 % put into the same folder as the specimen test data. 
 % File name for specimens should follow a system where the number at the
@@ -61,14 +61,14 @@
 % This will become Specimen_RawData_1, Specimen_RawData_2 etc. 
 % If preferred, the compliance (indentation) sample can follow this naming 
 % scheme, as the last specimen.
-
+ 
 % Often things can go wrong with testing (e.g. samples break before
 % testing). For this code, the numbers of files must be consecutive.
 % It is suggested to keep track of which samples correspond to the new 
 % naming system in a readme file, if required for future reference.
-
-% In this matlab script, in the USER INPUT section:
-% - Write in a name for specimen type and add it's values for yield strength 
+ 
+% In this MATLAB script, in the USER INPUT section:
+% - Write in a name for specimen type and add its values for yield strength 
 %   and Young's modulus from uniaxial tensile testing, these are required for
 %   validity checks and G_IC_LEFM.
 % - Insert file locations into the variables; directory_loc, indentdata_loc
@@ -82,132 +82,132 @@
 % - Make any adjustment to the validity criteria of the initial crack 
 %   length (e.g. extend from a/w = 0.45-0.55 or increase allowed variation 
 %   from average initial crack length from 10%.
-
+ 
 % Then click run!
-
+ 
 % A figure will appear with the indentation data. Select the linear region
 % that is representative of the sample compliance.
-
+ 
 % Afterwards, a figure will appear for each specimen, select two
 % x-coordinates to define the range to determine the average linear 
 % gradient, this will be used to find the Load 5 line.
 % It is suggested to use this sensibly, select the linear section which is
 % representative of the sample before the crack propagates.
-
+ 
 % Once the code has run, it will produce a written summary of the result 
 % for each specimen and mean values for valid specimens. It will also 
 % produce comparison figures for all specimens, displaying their validity.
-
+ 
 % If the user wishes to make the figure suitably sized for a report 
 % (8 cm wide), they may open the figure and then paste the three below 
 %  lines into the command window (uncomment first!)
-
+ 
 % set(gcf,'Units', 'centimeters','Position',[10 10 8 6])
 % set(gcf, [10 10 8 6]);
 % set(gca, 'XMinorTick','on','YMinorTick','on','Layer', 'top','Units', 'centimeters','Position',[0.9 0.9 6.8 4.8])
-
+ 
 % ----------------------------------------------------------------------- %
-
+ 
 % Clear all in workspace, command window and close all other windows and
 % figures.
-
+ 
 clear
 clc
 clf
 close all
 warning('off') % this just removes a warning about missing items from legends
-
+ 
 % ----------------------------------------------------------------------- %
-
+ 
 %%-----------------------------USER INPUT--------------------------------%%
-
+ 
 % Specimen type
 spectype = 'Material_1';
-
+ 
 % Tensile properties of the material from test data
 E = 3; % Stiffness in GPa
 sigma_y = 70; % Strength in MPa
-
+ 
 % Add a link to the location with your raw inston results (usually ends in '_RawData')
 % e.g. C:\Documents\Test_Results\Material_1\SENB\Material_1.is_flex_RawData
 directory_loc = 'C:\Documents\Test_Results\Material_1\SENB\Material_1.is_flex_RawData';
-
+ 
 % % Add a link to the file with your raw data for compliance test (ends in '_RawData_#.csv')
 % e.g. C:\Documents\Test_Results\Material_1\SENB\Material_1.is_flex_RawData\Specimen_RawData_#.csv
 indentdata_loc = 'C:\Documents\Test_Results\Material_1\SENB\Material_1.is_flex_RawData\Specimen_RawData_#.csv';
-
+ 
 % Add a link to the location of the specimen dimension file (using provided template)
 % e.g. C:\Documents\Test_Results\Material_1\SENB\Specimen_Dimensions
 dimensiondata_loc = 'C:\Documents\Test_Results\Material_1\SENB\Specimen_Dimensions';
-
+ 
 % Data start row (check in test data excel csv file which row your data starts for tests and indentation)
 data_start_row = 6;
-
+ 
 % Extension data column (check in test data excel csv file which column is strain for tests and indentation)
 ext_col = 1;
-
+ 
 % Load data column (check in test data excel csv file which column is load for tests and indentation)
 load_col = 2;
-
+ 
 % Set load drop threshold compared to max load (this is to delete extraneous data at the failure point, for a brittle material, 0.7-0.8 times maxload works well, but this can be altered if beneficial)
 loaddropthresh = 0.8;
-
+ 
 % Set max indent load (set to be 5-10 times larger than you max load from your testing, so there is chance to see the linear section)
 max_indent_load = 500;
-
+ 
 % Adjustment to validity criteria of samples
-
+ 
 % Initial crack length min and max a/w (the standard suggests 0.45-0.55,
 % however this can be difficult to control for brittle specimens which have
 % been razor tapped hence can be potentially relaxed)
 ICLmin = 0.45;
 ICLmax = 0.55;
-
+ 
 % Allowable variance of initial crack length (in %)(the standard uses 10%)
 % this can be difficult to control for brittle specimens which have
 % been razor tapped hence can be potentially relaxed
 ICLalvar = 10;
-
+ 
 %%-----------------------------END USER INPUT----------------------------%%
-
+ 
 %%-----------------------------START OF CODE-----------------------------%%
 % Define plot colours
-col{1}  =   [0      0.447   0.741];     %'#0072BD'	standard blue
-col{2}  =   [0.850  0.325   0.098];     %'#D95319'	orange
-col{3}  =   [0.929  0.694   0.125];     %'#EDB120'	darker yellow
-col{4}  =   [0.494  0.184   0.556];     %'#7E2F8E'	purple
-col{5}  =   [0.466  0.674   0.188];     %'#77AC30'	green
-col{6}  =   [0.301  0.745   0.933];     %'#4DBEEE'	lighter blue
-col{7}  =   [0.635  0.078   0.184];     %'#A2142F'  burgandy
+col{1}  =   [0      0.447   0.741];     %'#0072BD'  standard blue
+col{2}  =   [0.850  0.325   0.098];     %'#D95319'  orange
+col{3}  =   [0.929  0.694   0.125];     %'#EDB120'  darker yellow
+col{4}  =   [0.494  0.184   0.556];     %'#7E2F8E'  purple
+col{5}  =   [0.466  0.674   0.188];     %'#77AC30'  green
+col{6}  =   [0.301  0.745   0.933];     %'#4DBEEE'  lighter blue
+col{7}  =   [0.635  0.078   0.184];     %'#A2142F'  burgundy
 col{8}  =   [1      0       0];         %'#FF0000'  red
-col{9}  =   [0      1       0];         %'#00FF00'	green
+col{9}  =   [0      1       0];         %'#00FF00'  green
 col{10} =   [0      0       1];         %'#0000FF'  blue
-col{11} =   [0      1       1];         %'#00FFFF'	cyan
-col{12} =   [1      0       1];         %'#FF00FF'	magenta
-col{13} =   [1      1       0];         %'#FFFF00'	yellow
+col{11} =   [0      1       1];         %'#00FFFF'  cyan
+col{12} =   [1      0       1];         %'#FF00FF'  magenta
+col{13} =   [1      1       0];         %'#FFFF00'  yellow
 col{14} =   [0      0       0];         %'#000000'  black
 col{15} =   [0      0.5     0];         %'#000000'  dark green
     
 % Print specimen type 
 disp(spectype);
 disp(' ');
-
+ 
 % ------------------- Indentation/Compliance Specimen ------------------- %
-
+ 
 % Import indentation data
 indentdata = xlsread(indentdata_loc); 
-
+ 
 % Define indent load ext
 indent_Ext = indentdata(data_start_row:end, ext_col);
 indent_Load = indentdata(data_start_row:end, load_col);
 indent_Ext(any(isnan(indent_Ext),2) , :) = []; % Remove all indentation data that are NaN 
 indent_Load(any(isnan(indent_Load),2) , :) = []; % Remove all indentation data that are NaN 
-
+ 
 % Delete indent data > max indent
 [~,ind_del] = min(abs(max_indent_load-indent_Load));
 indent_Ext((ind_del+1):end) = [];
 indent_Load((ind_del+1):end) = [];
-
+ 
 % Plot indentation data
 figureindent = figure('Name','Compliance','Color','white','NumberTitle','off','units','normalized','outerposition',[0 0 1 1]);% make figure full screen for accurate selection of gradient
 axesindent = axes('Parent',figureindent);
@@ -220,58 +220,58 @@ grid(axesindent,'on');
 xlabel('Extension (mm)','FontWeight','bold','FontSize',10,...
     'FontName','Calibri');% x-axis label
 ylabel('Load (N)','FontWeight','bold','FontSize',10,'FontName','Calibri') % y-axis label  
-
+ 
 % Finding gradient of indentation
-
+ 
 % Choose the x-axis range to search for the average gradient using ginput
 [indentM_x1,~] = ginput(1);
 [indentM_x2,~] = ginput(1);
-
+ 
 % Find corresponding cell closest to the g-input value
 [~,indentM_x1] = min(abs(indent_Ext-indentM_x1));
 [~,indentM_x2] = min(abs(indent_Ext-indentM_x2));
-
+ 
 % Switch gradient points if selected in incorrect order
 if indentM_x1>indentM_x2
     indent_dummy = indentM_x1;
     indentM_x1 = indentM_x2;
     indentM_x2 = indent_dummy;
 end
-
+ 
 % Create new array over this defined interval
 windowedxindent = indent_Ext(indentM_x1:indentM_x2);
 windowedyindent = indent_Load(indentM_x1:indentM_x2);
-
+ 
 % Fit a line to data within the interval 
 [n, ~] = polyfit(windowedxindent, windowedyindent, 1);
 grad_indent = n(1,1);
 y_intercept_indent = n(1,2);
-
+ 
 % Plot the linear gradient fit
 fplot(@(x)grad_indent*x+y_intercept_indent, [0 max(indent_Ext)],'--','color',col{5});
-
+ 
 % Plot the linear gradient fit with corrected displacement
 compliancemaxlength=max(indent_Ext)-(- y_intercept_indent)/grad_indent;
 indent_Ext_corr= 0:0.00001:compliancemaxlength;
 indent_Load_corr=grad_indent*indent_Ext_corr;
-
+ 
 % Plot corrected indentation data
 plot(indent_Ext_corr,indent_Load_corr,'color',col{10});
 set(gcf,'units','pixels','Position',[540 500 480 320]) % return figure to small size
 legend('Location', 'northwest','NumColumnsMode','manual','NumColumns',1)
 legend('Indent Data','Linear Fit', 'Corrected Indent Data')
 savefig('Indentation');
-
+ 
 % ----------------------------------------------------------------------- %
-
+ 
 % -------------- Main loop to determine specimen toughness -------------- %
-
+ 
 % 'dir' will count how many .csv files are in this folder
 directory = dir([directory_loc, '\*.csv']);
-
+ 
 % The number of specimens is one less than the size of directory (last is compliance test)
 No_Spec=length(directory)-1;
-
+ 
 % Pre-allocate for computing efficiency
 senbdata = cell(1,No_Spec);    
 W = zeros(1,No_Spec);
@@ -319,18 +319,18 @@ E_stiff = zeros(1,No_Spec);
 E_fract = zeros(1,No_Spec);
 ACCratio = zeros(1,No_Spec);
 r_bar = zeros(1,No_Spec);
-
+ 
 % File name (do not write the number nor extension) 
 % The default name is 'Specimen_RawData_#' if using raw Instron results
 % the number will be added as the code iterates through the specimens.
 filename = strcat(directory_loc,'\Specimen_RawData_'); 
-
+ 
 % Import dimensions of  specimens from a spreadsheet in standard format. 
 dimensiondata = xlsread(dimensiondata_loc);
-
+ 
 for i = 1:No_Spec % Run for all specimens
 % for i=5 % To run for one specimen, specify i as a single value, i.e. i=1 for specimen 1
-
+ 
     % Initially set sample as valid (this will change if fails
     % validity criteria later in flow)
     v(i)=1;
@@ -340,18 +340,18 @@ for i = 1:No_Spec % Run for all specimens
     B(i) = dimensiondata((4*i),4); % thickness (mm)
     a(i) = dimensiondata((4*i),6); % crack length (mm)
     x(i) = a(i)/W(i);
-
+ 
     % Calculate geometry based factors
     f(i) = (6*x(i)^0.5)*(1.99-x(i)*(1-x(i))*(2.15-3.93*x(i)+2.7*x(i)^2))/((1+2*x(i))*(1-x(i))^(3/2)); 
    
     A(i) = (16*x(i)^2/(1-x(i))^2)*...
     (8.9-33.717*x(i)+79.616*x(i)^2-112.952*x(i)^3+84.815*x(i)^4-25.672*x(i)^5);
-
+ 
     dAdx(i) = (16*x(i)^2/(1-x(i))^2)*...
     (-33.717+159.232*x(i)-338.856*x(i)^2+339.26*x(i)^3-128.36*x(i)^4)+16*...
     (8.9-33.717*x(i)+79.616*x(i)^2-112.952*x(i)^3+84.815*x(i)^4-25.672*x(i)^5)*...
     ((2*x(i)*(1-x(i))+2*x(i)^2)/(1-x(i))^3);
-
+ 
     phi(i) = (A(i)+18.64)/dAdx(i);
     
     % Import load extension data and define the load, extension and peak load.
@@ -368,7 +368,7 @@ for i = 1:No_Spec % Run for all specimens
     Load = data(data_start_row:end, load_col);
     Load(any(isnan(Load),2) , :) = []; % Remove all indentation data that are NaN 
     [Pmax(i),Pmaxlength(i)] = max(Load);
-
+ 
     % Delete extraneous data after specimen failure
     for j = Pmaxlength(i) : length(Load)
         if (Load(j)<loaddropthresh*Pmax(i))
@@ -377,7 +377,7 @@ for i = 1:No_Spec % Run for all specimens
             break
         end
     end
-
+ 
     % Add a final array point at 0N, same displacement (to stop failure of
     % P5 line)
     d = size(Load)+1;
@@ -403,7 +403,7 @@ for i = 1:No_Spec % Run for all specimens
     [M_x2(i),~] = ginput(1);
     
     set(gcf,'units','pixels','Position',[540 500 480 320]) % return figure to small size
-
+ 
     % Find corresponding cell closest to the g-input value
     [~,M_x1(i)] = min(abs(Ext-M_x1(i)));
     [~,M_x2(i)] = min(abs(Ext-M_x2(i)));
@@ -415,24 +415,24 @@ for i = 1:No_Spec % Run for all specimens
         M_x1(i) = M_x2(i);
         M_x2(i) = M_dummy(i);
     end
-
+ 
     % Create new array over this defined interval
     windowedx = Ext(M_x1(i):M_x2(i));
     windowedy = Load(M_x1(i):M_x2(i));
-
+ 
     % Fit a line to data within the interval 
     [n, ~] = polyfit(windowedx, windowedy, 1);
     grad(i) = n(1,1);
     y_intercept_fit(i) = n(1,2);
     x_intercept_fit(i) = -y_intercept_fit(i)/grad(i);
-
+ 
     % Plot the gradient fit on the graph
     fplot(@(x)grad(i)*x+y_intercept_fit(i), [0 max(Ext)],'--','color',col{9});
       
     % Find 0.95 gradient line and define Cq
     Cq(i) = 1/grad(i);
     grad5(i) = grad(i)*0.95;
-
+ 
     % 0.95 gradient line
     Ext_Load5=cat(1,Ext,(Ext(2:end)+ max(Ext))); % create array twice as long as extension
     Load5=grad5(i)*(Ext_Load5-x_intercept_fit(i)); % produce load5 line data
@@ -444,27 +444,27 @@ for i = 1:No_Spec % Run for all specimens
     % Find position of largest continuous crossing by considering the
     % largest region that the Load5 line is less than the load ext plot.
     isdiff = diff(is);
-
+ 
     if  max(isdiff)>1 % If the line crosses the load ext plot more than once.
         [~,isloc] = max(isdiff);
         P5length(i) = is(isloc+1);
     else  % If the line only passes the load ext plot at Pq
         P5length(i) = is(1);
     end
-
+ 
     % Plot the 5% offset line
     plot(Ext(1:P5length(i)),Load5(1:P5length(i)),'-.','color',col{1});
     
     % Find the load at the point of crossing (Pq)
     Pq(i) = grad5(i)* (Ext(P5length(i))-x_intercept_fit(i)); 
-
+ 
     % Create variables for truncated load and extension
     Load_trunc=Load;
     Ext_trunc=Ext;
     
     if  P5length(i) < Pmaxlength(i) % If Pq happens before Pmax, use Pq            
         P(i) = Pq(i);
-
+ 
         % Truncate load ext data beyond P5length nd plot markers denoting
         % Pmax and P = Pq
         plot(Ext(Pmaxlength(i)),Load(Pmaxlength(i)),'o','MarkerSize',4,'color','black') % plot P max small
@@ -473,10 +473,10 @@ for i = 1:No_Spec % Run for all specimens
         plot(Ext(P5length(i)),Load5(P5length(i)),'*','MarkerSize',10, 'color','black')
         legend('Location', 'northwest','NumColumnsMode','manual','NumColumns',2)
         legend('Test Data','S','0.95S','P_{max}','P = P_q')
-
+ 
     else % If Pmax happens before Pq, use Pmax            
         P(i) = Pmax(i);
-
+ 
         % Truncate load ext data beyond P5length and plot markers denoting
         % Pq and P = Pmax
         plot(Ext(P5length(i)),Load5(P5length(i)),'o','MarkerSize',4, 'color','black') % plot Pq small
@@ -525,7 +525,7 @@ for i = 1:No_Spec % Run for all specimens
         legend('Location', 'southeast','NumColumnsMode','manual','NumColumns',1)
         legend('Compliance','Test Data','P_{max}','P = P_q')
         lgd.NumColumns = 2;
-
+ 
     else % If Pmax happens before Pq, use Pmax 
         plot(Ext(P5length(i)),Load5(P5length(i)),'o','MarkerSize',4, 'Color','black') % plot Pq small
         plot(Ext(Pmaxlength(i)),Load(Pmaxlength(i)),'*','MarkerSize',10, 'Color','black');
@@ -547,7 +547,7 @@ for i = 1:No_Spec % Run for all specimens
     % Calculate the corrected compliance
     Ci(i) = 1/grad_indent;
     Cc(i) = Cq(i) - Ci(i);
-
+ 
     % Final toughness calculation
     K_q(i) = ((P(i))/((B(i)*10^-3)*((W(i)*10^-3)^0.5)))*f(i)*10^-6; % units MPa m^1/2
     G_q_LEFM(i) = (1-0.35^2)*(K_q(i)*10^6)^2/(E*10^9); % units J m^-2
@@ -647,17 +647,17 @@ for i = 1:No_Spec % Run for all specimens
     
     disp(' ');
 end
-
+ 
 % ----------------------------------------------------------------------- %
-
+ 
 % -------------- Display average values and overview plots -------------- %
-
+ 
 % Calculate and display mean and standard deviation only for valid test
 % results.
 K_IC_avg = sum(K_IC)/sum(v);
 G_IC_energy_avg = sum(G_IC_energy)/sum(v);
 G_IC_LEFM_avg = sum(G_IC_LEFM)/sum(v);
-
+ 
 % Remove invalidity values for std
 K_IC_v = K_IC;
 K_IC_v(K_IC_v==0) = [];
@@ -665,20 +665,20 @@ G_IC_energy_v = G_IC_energy;
 G_IC_energy_v(G_IC_energy_v==0) = [];
 G_IC_LEFM_v = G_IC_LEFM;
 G_IC_LEFM_v(G_IC_LEFM_v==0) = [];
-
+ 
 % Calculate standard deviation
 K_IC_std = std(K_IC_v);
 G_IC_energy_std = std(G_IC_energy_v);
 G_IC_LEFM_std = std(G_IC_LEFM_v);
-
+ 
 % Produce cell with results and export file
 Spec_No = 1:No_Spec;
-
+ 
 % SENBResults  = ["Spec. No.","Thickness (mm)","Width (mm)","Crack Length (mm)","K_IC (MPa m^{1/2})","G_IC Energy (J m^{-2})","G_IC LEFM (J m^{-2})";Spec_No.',B.',W.',a.',K_IC.',G_IC_Energy.', G_IC_LEFM.';"Average",0,0,0,K_IC_avg,G_IC_Energy_avg,G_IC_LEFM_avg;"Standard Deviation",0,0,0,K_IC_std,G_IC_Energy_std,G_IC_LEFM_std;]
 SENBResults = table(Spec_No.',B.',W.',a.',K_IC.',G_IC_energy.', G_IC_LEFM.',v.');
 header = {'Specimen','Thickness','Width','CrackLength','K_IC','G_ICEnergy','G_ICLEFM','Valid'};
 SENBResults.Properties.VariableNames = header;
-
+ 
 % Display the values for K_IC and G_IC via Energy and LEFM methods
 disp(append('Summary of SENB results for ', spectype));
 disp(append('Initial crack length, a/w between ',num2str(ICLmin),' and ',num2str(ICLmax)));
@@ -690,14 +690,14 @@ disp(append('G_IC LEFM:   ',num2str(G_IC_LEFM_avg),' +- ', num2str(G_IC_LEFM_std
     
 % Close all intermediate figures
 close all
-
+ 
 % Plot K_IC, G_IC LEFM and G_IC Energy for each specimen, including
 % validity, mean and standard deviation
-
+ 
 % K_IC plot
 K_IC_overview = figure('Name','K_IC Overview','Color','white','NumberTitle','off');
 K_IC_axes = axes('Parent',K_IC_overview);
-
+ 
 % Plot mean and standard deviation
 plot([0, max(Spec_No)*1.1],[K_IC_avg, K_IC_avg],'-','color', col{10});
 hold on
@@ -713,35 +713,35 @@ grid(K_IC_axes,'on');
 xlabel('Specimen #','FontWeight','bold','FontSize',10,...
 'FontName','Calibri');% x-axis label
 ylabel('K_{IC} (MPa m^{1/2})','FontWeight','bold','FontSize',10,'FontName','Calibri') % y-axis label   
-
+ 
 % Plot all specimens assuming invalid in red
 plot(Spec_No, K_q,'*','color','red')
-
+ 
 % Plot valid values on top in black
 K_IC_plot = [K_IC;Spec_No];
 K_IC_plot(:,any(K_IC_plot == 0))=[];
 plot(K_IC_plot(2,:), K_IC_plot(1,:) ,'*','color',col{14})
-
+ 
 % Set legend
 legend('Location', 'south','NumColumnsMode','manual','NumColumns',2)
 legend('Mean','SD','Invalid','Valid')
-
+ 
 % Add axis limits for plot
 xlim([0 (max(Spec_No)*1.05)]);
 ylim([0 (max(K_q)*1.05)]);    
-
+ 
 savefig('K_IC Overview.fig');
-
+ 
 % G_IC_LEFM plot
 G_IC_LEFM_overview = figure('Name','G_IC_LEFM Overview','Color','white','NumberTitle','off');
 G_IC_LEFM_axes = axes('Parent',G_IC_LEFM_overview);
-
+ 
 % Plot mean and standard deviation
 plot([0, max(Spec_No)*1.1],[G_IC_LEFM_avg, G_IC_LEFM_avg],'-','color', col{10});
 hold on
 plot([0, max(Spec_No)*1.1],[(G_IC_LEFM_avg + G_IC_LEFM_std), (G_IC_LEFM_avg + G_IC_LEFM_std)],'-.','color', col{10});
 plot([0, max(Spec_No)*1.1],[(G_IC_LEFM_avg - G_IC_LEFM_std), (G_IC_LEFM_avg - G_IC_LEFM_std)],'-.','color', col{10},'HandleVisibility','off');
-
+ 
 % Set up visuals (gridlines, font etc)
 set(G_IC_LEFM_axes,'FontName','Calibri','FontSize',8)
 set(gcf,'Position',[540 500 480 320])
@@ -751,40 +751,40 @@ grid(G_IC_LEFM_axes,'on');
 xlabel('Specimen #','FontWeight','bold','FontSize',10,...
 'FontName','Calibri');% x-axis label
 ylabel('G_{IC, LEFM} (J m^{-2})','FontWeight','bold','FontSize',10,'FontName','Calibri') % y-axis label   
-
+ 
 % Plot all specimens assuming invalid in red
 plot(Spec_No, G_q_LEFM,'*','color','red')
-
+ 
 % Plot valid values on top in black
 G_IC_LEFM_plot = [G_IC_LEFM;Spec_No];
 G_IC_LEFM_plot(:,any(G_IC_LEFM_plot == 0))=[];
 plot(G_IC_LEFM_plot(2,:), G_IC_LEFM_plot(1,:) ,'*','color',col{14})
-
+ 
 % Set Legend
 legend('Location', 'south','NumColumnsMode','manual','NumColumns',2)
 legend('Mean','SD','Invalid','Valid')
-
+ 
 % Add axis limits for plot
 xlim([0.8 (max(Spec_No)+0.2)]);
-
+ 
 if max(G_q_energy)>max(G_q_LEFM)
     ylim([0.8 (max(G_q_energy)*1.05)]);  
 else
     ylim([0.8 (max(G_q_LEFM)*1.05)]);
 end
-
+ 
 savefig('G_IC_LEFM Overview.fig');
-
+ 
 % G_IC_energy plot
 G_IC_energy_overview = figure('Name','G_IC_energy Overview','Color','white','NumberTitle','off');
 G_IC_energy_axes = axes('Parent',G_IC_energy_overview);
-
+ 
 % Plot mean and standard deviation
 plot([0, max(Spec_No)*1.1],[G_IC_energy_avg, G_IC_energy_avg],'-','color', col{10});
 hold on
 plot([0, max(Spec_No)*1.1],[(G_IC_energy_avg + G_IC_energy_std), (G_IC_energy_avg + G_IC_energy_std)],'-.','color', col{10});
 plot([0, max(Spec_No)*1.1],[(G_IC_energy_avg - G_IC_energy_std), (G_IC_energy_avg - G_IC_energy_std)],'-.','color', col{10},'HandleVisibility','off');
-
+ 
 % Set up visuals (gridlines, font etc)
 set(G_IC_energy_axes,'FontName','Calibri','FontSize',8)
 set(gcf,'Position',[540 500 480 320])
@@ -794,38 +794,38 @@ grid(G_IC_energy_axes,'on');
 xlabel('Specimen #','FontWeight','bold','FontSize',10,...
 'FontName','Calibri');% x-axis label
 ylabel('G_{IC, energy} (J m^{-2})','FontWeight','bold','FontSize',10,'FontName','Calibri') % y-axis label   
-
+ 
 % Plot all specimens assuming invalid in red
 plot(Spec_No, G_q_energy,'*','color','red')
-
+ 
 % Plot valid values on top in black
 G_IC_energy_plot = [G_IC_energy;Spec_No];
 G_IC_energy_plot(:,any(G_IC_energy_plot == 0))=[];
 plot(G_IC_energy_plot(2,:), G_IC_energy_plot(1,:) ,'*','color',col{14})
-
+ 
 % Set legend
 legend('Location', 'south','NumColumnsMode','manual','NumColumns',2)
 legend('Mean','SD','Invalid','Valid')
-
+ 
 % Add axis limits for plot
 xlim([0.8 (max(Spec_No)+0.2)]);
-
+ 
 if max(G_q_energy)>max(G_q_LEFM)
     ylim([0.8 (max(G_q_energy)*1.05)]);  
 else
     ylim([0.8 (max(G_q_LEFM)*1.05)]);
 end
-
+ 
 savefig('G_IC_energy Overview.fig');
-
+ 
 % ----------------------------------------------------------------------- %
     
 % Close figures and save workspace
 close all
 save(spectype);
-
+ 
 %%----------------------------- END OF CODE -----------------------------%%
-
+ 
 % ----------------------------------------------------------------------- %
 % ------------------- Code to determine K_IC and G_IC ------------------- %
 % ------------ In accordance to ISO 527-1 and ASTM D5045-14 ------------- %
